@@ -1,0 +1,67 @@
+---
+title: "TO HTML"
+output:
+  html_document:
+    keep_md: yes
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(rJava)
+library(KoNLP)
+library(dplyr)
+
+useNIADic()
+
+txt <- readLines("file:///C:/r-working/hiphop.txt")
+head(txt)
+
+install.packages("stringr")
+library(stringr)
+
+txt <- str_replace_all(txt, "\\W", " ")
+nouns <- extractNoun(txt)
+nouns
+
+unlist(nouns)
+table(unlist(nouns))      
+wordcount <- table(unlist(nouns))
+df_word <- as.data.frame(wordcount, stringsAsFactors = F)
+df_word <- rename(df_word,
+                  word = Var1,
+                  freq = Freq)
+df_word <- filter(df_word, nchar(word) >= 2)
+
+top_20 <- df_word %>% 
+  arrange(desc(freq)) %>% 
+  head(200)
+
+top_20
+```
+
+## Including Plots
+
+
+```{r pressure, echo=FALSE}
+install.packages("wordCount")
+library(wordcloud)
+library(RColorBrewer)
+pal <- brewer.pal(8, "Dark2")
+set.seed(2000)
+
+wordcloud(words = df_word$word,
+          freq = df_word$freq,
+          min.freq = 2,
+          max.words = 200,
+          random.color = F,
+          rot.per = .1,
+          scale = c(4, 0.3),
+          colors = pal)
+```
+
